@@ -78,6 +78,9 @@ The model can be any object detection model:
 
 For first-use, we recommend using the ssd300 model provided by the **model downloader**.
 
+Convert your model using the Model Optimizer:
+``` python mo.py --input_model ssd300.caffemodel ```
+
 ### What Input Video to Use
 The application works with any input video.
 Sample videos for object detection are provided [here](https://github.com/intel-iot-devkit/sample-videos/).  
