@@ -8,7 +8,7 @@ The output of the Store-traffic-monitor reference implementation is read and dis
 
 Chrome*:
 ```
-google-chrome --user-data-dir=$HOME/.config/google-chrome/Store-traffic-monitor --new-window --allow-file-access-from-files --allow-file-access --allow-cross-origin-auth-prompt index.html
+google-chrome  --user-data-dir=$HOME/.config/google-chrome/Store-traffic-monitor --new-window --allow-file-access-from-files --allow-file-access --allow-cross-origin-auth-prompt index.html
 ```
 Firefox*:
 ```
