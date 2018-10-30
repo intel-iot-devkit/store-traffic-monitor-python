@@ -5,6 +5,7 @@ The output of the Store-traffic-monitor reference implementation is read and dis
 **To avoid any browser issues, the application should be started first, and then the UI.**
 
 ## Running the UI
+In the `UI` folder of the reference-implementation run the following commands.   
 
 Chrome*:
 ```
