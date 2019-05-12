@@ -1,6 +1,4 @@
 /*
- * Authors: Mihaela Mihai <mihaela.mihai@rinftech.com>
- *          Stefan Andritoiu <stefan.andritoiu@gmail.com>
  * Copyright (c) 2018 Intel Corporation.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
