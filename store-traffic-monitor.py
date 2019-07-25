@@ -238,25 +238,33 @@ def arrange_windows(width, height):
         Arranges the windows so they are not overlapping
         Also starts the display threads
     """
-    spacer = 25
+    spacer = 80
     cols = 0
     rows = 0
+    width = 600
+    height = 600
+    dim = (width, height) 
 
     # Arrange video windows
     for idx in range(len(videoCaps)):
         if cols == WINDOW_COLUMNS:
             cols = 0
             rows += 1
-        cv2.namedWindow(CAM_WINDOW_NAME_TEMPLATE.format(idx), cv2.WINDOW_AUTOSIZE)
+        cv2.namedWindow(CAM_WINDOW_NAME_TEMPLATE.format(idx), cv2.WINDOW_NORMAL)
+        cv2.resizeWindow(CAM_WINDOW_NAME_TEMPLATE.format(idx), dim)
         cv2.moveWindow(CAM_WINDOW_NAME_TEMPLATE.format(idx),
-                       (spacer + width) * cols, (spacer + height) * rows)
+                       (spacer + (width+30)) * cols, (spacer + height) * rows)
         cols += 1
 
     # Arrange statistics window
+    s_height = 350
+    s_width = 399
+    s_dim = (s_width, s_height)
     if cols == WINDOW_COLUMNS:
         cols = 0
         rows += 1
-    cv2.namedWindow(STATS_WINDOW_NAME, cv2.WINDOW_AUTOSIZE)
+    cv2.namedWindow(STATS_WINDOW_NAME, cv2.WINDOW_NORMAL)
+    cv2.resizeWindow(STATS_WINDOW_NAME, s_dim)
     cv2.moveWindow(STATS_WINDOW_NAME, (spacer + width) * cols,
                    (spacer + height) * rows)
 
@@ -487,7 +495,7 @@ def main():
                     videoCapResult.frames+=1
 
                 videoCapResult.cur_frame = cv2.resize(videoCapResult.cur_frame, (w, h))
-
+               
                 if UI_OUTPUT:
                     imgName = videoCapResult.cap_name
                     imgName = imgName.split()[0] + "_" + chr(ord(imgName.split()[1]) + 1)
@@ -504,18 +512,18 @@ def main():
                     log_message = "Async mode is on." if is_async_mode else \
                                   "Async mode is off."
                     cv2.putText(videoCapResult.cur_frame, log_message, (15, 15),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                                cv2.FONT_HERSHEY_TRIPLEX, 0.5, (50, 205, 50), 1)
                     log_message = "Total {} count: {}"\
                         .format(videoCapResult.req_label, videoCapResult.total_count)
                     cv2.putText(videoCapResult.cur_frame, log_message, (10, h - 10)
-                                , cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                                , cv2.FONT_HERSHEY_DUPLEX, 0.5, (205 ,0, 0), 1)
                     log_message = "Current {} count: {}"\
                         .format(videoCapResult.req_label, videoCapResult.last_correct_count)
                     cv2.putText(videoCapResult.cur_frame, log_message, (10, h - 30),
-                                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                                cv2.FONT_HERSHEY_DUPLEX, 0.5, (205, 0, 0), 1)
                     cv2.putText(videoCapResult.cur_frame,
                                 'Infer wait: %0.3fs' % (infer_duration.total_seconds()),
-                                (10, h - 70), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                                (10, h - 70), cv2.FONT_HERSHEY_DUPLEX, 0.5, (205, 0, 0), 1)
 
                     # Display inferred frame and stats
                     stats = numpy.zeros((statsHeight, statsWidth, 1), dtype = 'uint8')
@@ -529,7 +537,7 @@ def main():
                     end_time = datetime.datetime.now()
                     cv2.putText(videoCapResult.cur_frame, 'FPS: %0.2fs'
                                 % (1 / (end_time - videoCapResult.start_time).total_seconds()),
-                                (10, h - 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                                (10, h - 50), cv2.FONT_HERSHEY_DUPLEX, 0.5, (205, 0, 0), 1)
                     cv2.imshow(videoCapResult.cap_name, videoCapResult.cur_frame)
                     videoCapResult.start_time = datetime.datetime.now()
                     videoCapResult.video.write(videoCapResult.cur_frame)
