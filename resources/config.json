@@ -1,0 +1,19 @@
+{
+    
+    "inputs": [
+
+	    {
+            "video": "../resources/people-detection.mp4",
+            "label": "person"
+        },
+        {
+            "video": "../resources/one-by-one-person-detection.mp4",
+            "label": "person"
+        },
+        {
+            "video": "../resources/bottle-detection.mp4",
+            "label": "bottle"
+        }
+    ]
+    
+}

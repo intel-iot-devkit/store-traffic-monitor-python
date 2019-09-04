@@ -6,7 +6,7 @@
 | Programming Language: |  Python* 3.5 |
 | Time to Complete:    |  50-70min     |
 
-![store-traffic-monitor](docs/images/stm.png)
+![store-traffic-monitor](../docs/images/stm.png)
 
 An application capable of detecting objects on any number of screens.
 
@@ -25,11 +25,12 @@ This sample application detects objects in a video stream and calculates the ave
   
 * OpenCL™ Runtime Package
 * Intel® Distribution of OpenVINO™ toolkit 2019 R2 Release
+* Jupyter* Notebook v5.7.0
 
 ## How it Works
 The counter uses the Inference Engine included in the Intel® Distribution of OpenVINO™ toolkit. A trained neural network detects objects within a designated area by displaying a green bounding box over them. This reference implementation identifies multiple objects entering the frame and identifies their class, count, and time entered. 
 
-![Architectural Diagram](docs/images/architectural-diagram.png)
+![Architectural Diagram](../docs/images/architectural-diagram.png)
 
 ## Setup
 
@@ -49,6 +50,7 @@ You will need the OpenCL™ Runtime Package if you plan to run inference on the 
 ### Other dependencies
 #### FFmpeg* 
 FFmpeg is a free and open-source project capable of recording, converting and streaming digital audio and video in various formats. It can be used to do most of our multimedia tasks quickly and easily say, audio compression, audio/video format conversion, extract images from a video and a lot more.
+
 
 ### Which model to use
 This application uses the [mobilenet-ssd](https://github.com/chuanqi305/MobileNet-SSD) model, that can be accessed using the **model downloader**. The **model downloader** downloads the model as Caffe* model files. These need to be passed through the **model optimizer** to generate the IR (the __.xml__ and __.bin__ files) that will be used by the application.
@@ -153,96 +155,114 @@ You must configure the environment to use the Intel® Distribution of OpenVINO�
     source /opt/intel/openvino/bin/setupvars.sh -pyver 3.5
     
 __Note__: This command needs to be executed only once in the terminal where the application will be executed. If the terminal is closed, the command needs to be executed again.
-    
-## Run the Application
 
-Change the current directory to the git-cloned application code location on your system:
-
-    cd <path_to_the_store-traffic-monitor-python_directory>/application
-
-To see a list of the various options:
-
-    ./store-traffic-monitor.py -h
-
-A user can specify what target device to run on by using the device command-line argument `-d` followed by one of the values `CPU`, `GPU`, `HDDL` or `MYRIAD`.<br>   
-To run with multiple devices use -d MULTI:device1,device2. For example: `-d MULTI:CPU,GPU,HDDL`<br>
-If no target device is specified the application will run on the CPU by default.
-
-### Running on the CPU
-Although the application runs on the CPU by default, this can also be explicitly specified through the `-d CPU` command-line argument:
-```
-./store-traffic-monitor.py -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
-```
-To run the application on sync mode, use `-f sync` as command line argument. By default, the application runs on async mode.
-
-### Running on the integrated GPU
-To run on the integrated Intel® GPU in 32 bit mode, use the `-d GPU` command-line argument:
-
-```
-./store-traffic-monitor.py -d GPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt
-```
-   **FP32**: FP32 is single-precision floating-point arithmetic uses 32 bits to represent numbers. 8 bits for the magnitude and 23 bits for the precision. For more information, [click here](https://en.wikipedia.org/wiki/Single-precision_floating-point_format)<br>
-    
-To use GPU in 16 bit mode, use the following command:
-
-```
-./store-traffic-monitor.py -d GPU -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
-```
-   **FP16**: FP16 is half-precision floating-point arithmetic uses 16 bits. 5 bits for the magnitude and 10 bits for the precision. For more information, [click here](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)
-
-### Running on the Intel® Neural Compute Stick
-To run on the Intel® Neural Compute Stick, use the `-d MYRIAD` command-line argument.
-
-```
-./store-traffic-monitor.py -d MYRIAD -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
-```
-
-**Note:** The Intel® Neural Compute Stick can only run FP16 models. The model that is passed to the application, through the `-m <path_to_model>` command-line argument, must be of data type FP16.   
-
-### Run on the Intel® Movidius™ VPU
-To run on the Intel® Movidius™ VPU, use the `-d HDDL` command-line argument:
-
-```
-./store-traffic-monitor.py -d HDDL -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
-```
-
-**Note:** The Intel® Movidius™ VPU can only run FP16 models. The model that is passed to the application, through the `-m <path_to_model>` command-line argument, must be of data type FP16.
+## Run the Application on Jupyter*
 
 <!--
-### Run on the FPGA
-
-Before running the application on the FPGA,  program the AOCX (bitstream) file. Use the setup_env.sh script from [fpga_support_files.tgz](https://clicktime.symantec.com/38YrYPLxxSqYhBQLb1eruhW7Vc?u=http%3A%2F%2Fregistrationcenter-download.intel.com%2Fakdlm%2Firc_nas%2F12954%2Ffpga_support_files.tgz) to set the environment variables.<br>
+**Note:**<br>
+Before running the application on the FPGA, program the AOCX (bitstream) file. Use the setup_env.sh script from [fpga_support_files.tgz](http://registrationcenter-download.intel.com/akdlm/irc_nas/12954/fpga_support_files.tgz) to set the environment variables.<br>
 For example:
 
     source /home/<user>/Downloads/fpga_support_files/setup_env.sh
-
-The bitstreams for HDDL-F can be found under the `/opt/intel/openvino/bitstreams/a10_vision_design_bitstreams` folder.<br><br>To program the bitstream use the below command:<br>
-
+    
+The bitstreams for HDDL-F can be found under the `/opt/intel/openvino/bitstreams/a10_vision_design_bitstreams` folder.<br>To program the bitstream use the below command:<br>
+    
     aocl program acl0 /opt/intel/openvino/bitstreams/a10_vision_design_bitstreams/2019R1_PL1_FP11_MobileNet_Clamp.aocx
+    
+For more information on programming the bitstreams, please refer to https://software.intel.com/en-us/articles/OpenVINO-Install-Linux-FPGA#inpage-nav-11 <br>
+<br>
+-->
+Go to the _store-traffic-monitor-python directory_ and open the Jupyter notebook by running the following commands:
 
-For more information on programming the bitstreams, please refer to https://software.intel.com/en-us/articles/OpenVINO-Install-Linux-FPGA#inpage-nav-11
+    cd <path_to_the_store-traffic-monitor-python_directory>/Jupyter
+ 
+    jupyter notebook
 
-To run the application on the FPGA with floating point precision 16 (FP16), use the `-d HETERO:FPGA,CPU` command-line argument:
 
-    ./store-traffic-monitor.py -d HETERO:FPGA,CPU -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
+#### Follow the steps to run the code on Jupyter*:
 
+![Jupyter Notebook](../docs/images/jupyter.png)
+
+1. Click on **New** button on the right side of the Jupyter window.
+
+2. Click on **Python 3** option from the drop down list.
+
+3. In the first cell type **import os** and press **Shift+Enter** from the keyboard.
+
+4. Export the below environment variables in second cell of Jupyter and press **Shift+Enter**.<br>
+   
+       %env MODEL = ../resources/FP32/mobilenet-ssd.xml
+       %env LABELS = ../resources/labels.txt
+       %env DEVICE = CPU
+       %env CPU_EXTENSION = /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
+       %env UI = false
+       %env LOOP = false
+
+ To run the application on sync mode, export the environment variable **%env FLAG = sync**. By default, the application runs on async mode.
+   
+5. Copy the code from **store-traffic-monitor-jupyter.py** and paste it in the next cell and press **Shift+Enter**.
+
+6. Alternatively, code can be run in the following way.
+
+    i. Click on the **store-traffic-monitor-jupyter.ipynb** file in the Jupyter notebook window.
+    
+    ii. Click on the **Kernel** menu and then select **Restart & Run All** from the drop down list.
+    
+    iii. Click on Restart and Run All Cells.
+
+    ![Jupyter Notebook](../docs/images/jupyter_code.png)
+
+**NOTE:**
+
+1. To run the application on **GPU**:
+     * With the floating point precision 32 (FP32), change the **%env DEVICE = CPU** to **%env DEVICE = GPU**<br>
+     **FP32**: FP32 is single-precision floating-point arithmetic uses 32 bits to represent numbers. 8 bits for the magnitude and 23 bits for the precision. For more information, [click here](https://en.wikipedia.org/wiki/Single-precision_floating-point_format)<br>
+
+     * With the floating point precision 16 (FP16), 
+       
+       * change the **%env DEVICE = CPU** to **%env DEVICE = GPU**
+       * Please follow steps from **Downloading the mobilenet-ssd Intel® Model** section to download FP16 model. Set the path of the FP16 model in the environment variable `MODEL` as given below: <br>
+       **%env MODEL = ../resources/FP16/mobilenet-ssd.xml** <br>
+       
+       **FP16**: FP16 is half-precision floating-point arithmetic uses 16 bits. 5 bits for the magnitude and 10 bits for the precision. For more information, [click here](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)
+
+     * **CPU_EXTENSION** environment variable is not required.
+   
+2. To run the application on **Intel® Neural Compute Stick**: 
+      * Change the **%env DEVICE = CPU** to **%env DEVICE = MYRIAD**.  
+      * The Intel® Neural Compute Stick can only run FP16 models. Please follow steps from **Downloading the mobilenet-ssd Intel® Model** section to download FP16 model. Set the path of the FP16 model in the environment variable `MODEL` as given below: <br>
+       **%env MODEL = ../resources/FP16/mobilenet-ssd.xml** <br>        
+      * **CPU_EXTENSION** environment variable is not required.
+
+3. To run the application on **Intel® Movidius™ VPU**:
+      * Change the **%env DEVICE = CPU** to **%env DEVICE = HDDL**
+      * The Intel® Movidius™ VPU can only run FP16 models. Change the environment variable for the model as shown below  and the model that is passed to the application must be of data type FP16. <br>
+      **%env MODEL = ../resources/FP16/mobilenet-ssd.xml** <br>
+      * **CPU_EXTENSION** environment variable is not required.
+
+4.  By default, the application reads the input videos only once. To continuously loop the videos, change the value of LOOP in the environmental variable as given below.
+
+    Change the **%env LOOP = false** to **%env LOOP = true**
+
+5. To run the application on multiple devices: <br>
+   For example:
+      * Change the **%env DEVICE = CPU** to **%env DEVICE = MULTI:CPU,GPU,MYRIAD**
+      * With the **floating point precision 16 (FP16)**, change the path of the model in the environment variable **MODEL** as given below: <br>
+      **%env MODEL = ../resources/FP16/mobilenet-ssd.xml** <br>
+      * **%env CPU_EXTENSION=/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so**<br>
+
+<!--
+6. To run the application on **FPGA**:
+      * Change the **%env DEVICE = CPU** to **%env DEVICE = HETERO:FPGA,CPU**
+      * With the **floating point precision 16 (FP16)**, change the path of the model in the environment variable **MODEL** as given below: <br>
+      **%env MODEL = ../resources/FP16/mobilenet-ssd.xml** <br>
+      * **%env CPU_EXTENSION=/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so**<br>
 -->
 
-### Loop the input video
-By default, the application reads the input videos only once, and ends when the videos ends.
-In order to not have the sample videos end, thereby ending the application, the option to continuously loop the videos is provided.    
-This is done by running the application with the `-lp true` command-line argument:
-
-```
-./store-traffic-monitor.py -lp true -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
-```
-This looping does not affect live camera streams, as camera video streams are continuous and do not end.
-
-## Using the browser UI
+#### Using the browser UI
 
 The default application uses a simple user interface created with OpenCV. A web based UI, with more features is also provided with this application.<br>
-From the working directory, run the application with ```-ui true``` command line argument. For example:
-```
-./store-traffic-monitor.py -ui true -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
-```
-Follow the readme provided [here](./UI) to run the web based UI.
+To run the application with UI mode on, change the environment variable `UI` in second cell to `true` i.e <br>
+```%env UI = true```<br>
+
+Follow the readme provided [here](../UI) to run the web based UI.

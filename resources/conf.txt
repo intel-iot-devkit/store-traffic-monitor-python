@@ -1,3 +1,0 @@
-./resources/people-detection.mp4 person
-./resources/one-by-one-person-detection.mp4 person
-./resources/bottle-detection.mp4 bottle

@@ -37,6 +37,7 @@ import datetime
 import collections
 import threading
 import queue
+import json
 import datetime
 import numpy as np
 from inference import Network
@@ -44,10 +45,10 @@ from inference import Network
 # CONSTANTS
 ##########################################################
 
-CONF_FILE = './resources/conf.txt'
-CONF_VIDEODIR = './UI/resources/video_frames/'
-CONF_DATAJSON_FILE = './UI/resources/video_data/data.json'
-CONF_VIDEOJSON_FILE = './UI/resources/video_data/videolist.json'
+CONFIG_FILE = '../resources/config.json'
+CONF_VIDEODIR = '../UI/resources/video_frames/'
+CONF_DATAJSON_FILE = '../UI/resources/video_data/data.json'
+CONF_VIDEOJSON_FILE = '../UI/resources/video_data/videolist.json'
 CPU_EXTENSION = ''
 TARGET_DEVICE = 'CPU'
 STATS_WINDOW_NAME = 'Statistics'
@@ -72,7 +73,7 @@ log_lock = threading.Lock()
 frames = 0
 frameNames = []
 numVids = 20000
-acceptedDevices= ['CPU', 'GPU', 'MYRIAD', 'HETERO:FPGA,CPU', 'HETERO:HDDL,CPU']
+accepted_devices = ['CPU', 'GPU', 'MYRIAD', 'HETERO:FPGA,CPU', 'HDDL']
 
 ##########################################################
 # CLASSES
@@ -84,6 +85,7 @@ class FrameInfo:
         self.frameNo = frameNo
         self.count = count
         self.timestamp = timestamp
+
 
 class VideoCap:
     def __init__(self, cap, req_label, cap_name, is_cam):
@@ -114,10 +116,10 @@ class VideoCap:
         self.videoName = cap_name + "_inferred.mp4"
 
     def init_vw(self, h, w, fps):
-        self.video = cv2.VideoWriter(os.path.join('resources',self.videoName),
+        self.video = cv2.VideoWriter(os.path.join('../resources', self.videoName),
                                      0x00000021, fps, (w, h), True)
         if not self.video.isOpened():
-            print ("Could not open for write" + self.videoName)
+            print("Could not open for write" + self.videoName)
             sys.exit(1)
 
 
@@ -127,10 +129,12 @@ class VideoCap:
 
 
 def args_parser():
+
     parser = ArgumentParser()
     parser.add_argument("-d", "--device",
                         help="Specify the target device to infer on; CPU, GPU "
-                             "FPGA, HDDL or MYRIAD is acceptable. Application will "
+                             "FPGA, HDDL or MYRIAD is acceptable. To run with multiple devices use "
+                             "MULTI:<device1>,<device2>,etc. Application will "
                              "look for a suitable plugin for device specified "
                              "(CPU by default)",
                         type=str, required=False)
@@ -148,12 +152,13 @@ def args_parser():
                         type=str, default=None)
     parser.add_argument("-n", "--num_videos", help="Number of videos to "
                                                    "select from config file",
-                        type = int, default = None)
+                        type=int, default = None)
     parser.add_argument("-ui", "--user_interface",
                         help="User interface for the video samples",
                         type=str, default=None)
+    parser.add_argument("-f", "--flag", help="sync or async", default="async", type=str)
 
-    global model_xml, model_bin, TARGET_DEVICE, labels_file,\
+    global is_async_mode, model_xml, model_bin, TARGET_DEVICE, labels_file,\
         CPU_EXTENSION, LOOP_VIDEO, numVids, UI_OUTPUT
     args = parser.parse_args()
     if args.model:
@@ -177,22 +182,34 @@ def args_parser():
         UI_OUTPUT = args.user_interface
         if UI_OUTPUT == "true":
             UI_OUTPUT = True
+    if args.flag == "sync":
+        is_async_mode = False
+    else:
+        is_async_mode = True
 
 
 def check_args():
     # ArgumentParser checks model and labels by default right now
     if model_xml == '':
-        print ("You need to specify the path to the .xml file")
-        print ("Use -m MODEL or --model MODEL")
+        print("You need to specify the path to the .xml file")
+        print("Use -m MODEL or --model MODEL")
         sys.exit(11)
     if labels_file == '':
-        print ("You need to specify the path to the labels file")
-        print ("Use -l LABELS or --labels LABELS")
+        print("You need to specify the path to the labels file")
+        print("Use -l LABELS or --labels LABELS")
         sys.exit(12)
+
     global TARGET_DEVICE
-    if TARGET_DEVICE not in acceptedDevices:
-        print ("Unsupporterd device " + TARGET_DEVICE)
+    if 'MULTI' not in TARGET_DEVICE and TARGET_DEVICE not in accepted_devices:
+        print("Unsupported device: " + TARGET_DEVICE)
         sys.exit(13)
+    elif 'MULTI' in TARGET_DEVICE:
+        target_devices = TARGET_DEVICE.split(':')[1].split(',')
+        for multi_device in target_devices:
+            if multi_device not in accepted_devices:
+                print("Unsupported device: " + TARGET_DEVICE)
+                sys.exit(13)
+
     if numVids < 1:
         print("Please set NUM_VIDEOS to at least 1")
         sys.exit(14)
@@ -203,33 +220,33 @@ def parse_conf_file():
         Parses the configuration file.
         Reads videoCaps
     """
-    with open(CONF_FILE, 'r') as f:
-        cnt = 0
-        for idx, item in enumerate(f.read().splitlines()):
-            if cnt < numVids:
-                split = item.split()
-                if split[0].isdigit():
-                    videoCap = VideoCap(cv2.VideoCapture(int(split[0])),
-                                        split[1],
-                                        CAM_WINDOW_NAME_TEMPLATE.format(idx),
-                                        True)
-                else:
-                    if os.path.isfile(split[0]) :
-                        videoCap = VideoCap(cv2.VideoCapture(split[0]),
-                                            split[1],
-                                            CAM_WINDOW_NAME_TEMPLATE.format(idx),
-                                            False)
-                    else:
-                        print ("Couldn't find " + split[0])
-                        sys.exit(3)
-                videoCaps.append(videoCap)
-                cnt += 1
+    assert os.path.isfile(CONFIG_FILE), "{} file doesn't exist".format(CONFIG_FILE)
+    config = json.loads(open(CONFIG_FILE).read())
+    cnt = 0
+    for idx, item in enumerate(config['inputs']):
+        if cnt < numVids:
+            if item['video'].isdigit():
+                videoCap = VideoCap(cv2.VideoCapture(int(item['video'])),
+                                    item['label'],
+                                    CAM_WINDOW_NAME_TEMPLATE.format(idx),
+                                    True)
             else:
-                break
+                if os.path.isfile(item['video']):
+                    videoCap = VideoCap(cv2.VideoCapture(item['video']),
+                                        item['label'],
+                                        CAM_WINDOW_NAME_TEMPLATE.format(idx),
+                                        False)
+                else:
+                    print("Couldn't find " + item['video'])
+                    sys.exit(3)
+            videoCaps.append(videoCap)
+            cnt += 1
+        else:
+            break
 
     for vc in videoCaps:
         if not vc.cap.isOpened():
-            print ("Could not open for reading " + vc.cap_name)
+            print("Could not open for reading " + vc.cap_name)
             sys.exit(2)
 
 
@@ -328,27 +345,23 @@ def main():
     global rolling_log
     global TARGET_DEVICE
     global videoCapsJson
+    global is_async_mode
 
     args_parser()
     check_args()
     parse_conf_file()
-
-    if TARGET_DEVICE not in acceptedDevices:
-        print ("Unsupporterd device " + TARGET_DEVICE + ". Defaulting to CPU")
-        TARGET_DEVICE = 'CPU'
 
     # Initialize the class
     infer_network = Network()
     # Load the network to IE Plugin
     n, c, h, w = infer_network.load_model(model_xml, TARGET_DEVICE, 1, 1, 2, CPU_EXTENSION)[1]
     minFPS = min([i.cap.get(cv2.CAP_PROP_FPS) for i in videoCaps])
-    waitTime = int(round(1000 / minFPS / len(videoCaps))) # wait time in ms between showing frames
     for vc in videoCaps:
         vc.init_vw(h, w, minFPS)
 
     statsWidth = w if w > 345 else 345
     statsHeight = h if h > (len(videoCaps) * 20 + 15) else (len(videoCaps) * 20 + 15)
-    statsVideo = cv2.VideoWriter(os.path.join('resources','Statistics.mp4'),
+    statsVideo = cv2.VideoWriter(os.path.join('../resources', 'Statistics.mp4'),
                                  0x00000021, minFPS, (statsWidth, statsHeight), True)
     if not statsVideo.isOpened():
         print("Couldn't open stats video for writing")
@@ -368,8 +381,6 @@ def main():
     # Init inference request IDs
     cur_request_id = 0
     next_request_id = 1
-    # Start with async mode enabled
-    is_async_mode = True
 
     if not UI_OUTPUT:
         # Arrange windows so they are not overlapping
@@ -382,6 +393,11 @@ def main():
 
     if UI_OUTPUT:
         videoCapsJson = videoCaps.copy()
+
+    if is_async_mode:
+        print("Application running in async mode...")
+    else:
+        print("Application running in sync mode...")
 
     while True:
 
@@ -410,7 +426,7 @@ def main():
                                 (20, 150),
                                 cv2.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 1)
                     cv2.imshow(videoCapInfer.cap_name, stream_end_frame)
-                    cv2.waitKey(waitTime)
+                    cv2.waitKey(1)
                     videoCaps.pop(idx)
                     continue
             # Copy the current frame for later use
@@ -426,7 +442,7 @@ def main():
             if is_async_mode:
                 # Async enabled and only one video capture
                 infer_network.exec_net(next_request_id, in_frame)
-                if(len(videoCaps) == 1):
+                if len(videoCaps) == 1:
                     videoCapResult = videoCapInfer
                 # Async enabled and more than one video capture
                 else:
@@ -434,7 +450,7 @@ def main():
                     videoCapResult = videoCaps[idx - 1 if idx - 1 >= 0 else len(videoCaps) - 1]
             else:
                 # Async disabled
-                infer_network.exec_net(next_request_id, in_frame)
+                infer_network.exec_net(cur_request_id, in_frame)
                 videoCapResult = videoCapInfer
 
             if infer_network.wait(cur_request_id) == 0:
@@ -476,10 +492,10 @@ def main():
                             
                         new_objects = current_count - videoCapResult.last_correct_count
                         for _ in range(new_objects):
-                            strng = "{} - {} detected on {}".\
+                            string = "{} - {} detected on {}".\
                                 format(time.strftime("%H:%M:%S"),
                                        videoCapResult.req_label, videoCapResult.cap_name)
-                            rolling_log.append(strng)
+                            rolling_log.append(string)
 
                     videoCapResult.frames+=1
                     videoCapResult.last_correct_count = current_count
@@ -513,9 +529,10 @@ def main():
                         .format(videoCapResult.req_label, videoCapResult.last_correct_count)
                     cv2.putText(videoCapResult.cur_frame, log_message, (10, h - 30),
                                 cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
-                    cv2.putText(videoCapResult.cur_frame,
-                                'Infer wait: %0.3fs' % (infer_duration.total_seconds()),
-                                (10, h - 70), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+                    if not is_async_mode:
+                        cv2.putText(videoCapResult.cur_frame,
+                                    'Infer wait: %0.3fs' % (infer_duration.total_seconds()),
+                                    (10, h - 70), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
                     # Display inferred frame and stats
                     stats = numpy.zeros((statsHeight, statsWidth, 1), dtype = 'uint8')
@@ -535,7 +552,7 @@ def main():
                     videoCapResult.video.write(videoCapResult.cur_frame)
 
             # Wait if necessary for the required time
-            key = cv2.waitKey(waitTime)
+            key = cv2.waitKey(1)
 
             # Esc key pressed
             if key == 27:
