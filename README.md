@@ -171,7 +171,7 @@ If no target device is specified the application will run on the CPU by default.
 ### Running on the CPU
 Although the application runs on the CPU by default, this can also be explicitly specified through the `-d CPU` command-line argument:
 ```
-./store-traffic-monitor.py -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
+python3 store-traffic-monitor.py -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
 ```
 To run the application on sync mode, use `-f sync` as command line argument. By default, the application runs on async mode.
 
@@ -179,14 +179,14 @@ To run the application on sync mode, use `-f sync` as command line argument. By 
 To run on the integrated Intel® GPU in 32 bit mode, use the `-d GPU` command-line argument:
 
 ```
-./store-traffic-monitor.py -d GPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt
+python3 store-traffic-monitor.py -d GPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt
 ```
    **FP32**: FP32 is single-precision floating-point arithmetic uses 32 bits to represent numbers. 8 bits for the magnitude and 23 bits for the precision. For more information, [click here](https://en.wikipedia.org/wiki/Single-precision_floating-point_format)<br>
     
 To use GPU in 16 bit mode, use the following command:
 
 ```
-./store-traffic-monitor.py -d GPU -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
+python3 store-traffic-monitor.py -d GPU -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
 ```
    **FP16**: FP16 is half-precision floating-point arithmetic uses 16 bits. 5 bits for the magnitude and 10 bits for the precision. For more information, [click here](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)
 
@@ -194,7 +194,7 @@ To use GPU in 16 bit mode, use the following command:
 To run on the Intel® Neural Compute Stick, use the `-d MYRIAD` command-line argument.
 
 ```
-./store-traffic-monitor.py -d MYRIAD -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
+python3 store-traffic-monitor.py -d MYRIAD -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
 ```
 
 **Note:** The Intel® Neural Compute Stick can only run FP16 models. The model that is passed to the application, through the `-m <path_to_model>` command-line argument, must be of data type FP16.   
@@ -203,7 +203,7 @@ To run on the Intel® Neural Compute Stick, use the `-d MYRIAD` command-line arg
 To run on the Intel® Movidius™ VPU, use the `-d HDDL` command-line argument:
 
 ```
-./store-traffic-monitor.py -d HDDL -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
+python3 store-traffic-monitor.py -d HDDL -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
 ```
 
 **Note:** The Intel® Movidius™ VPU can only run FP16 models. The model that is passed to the application, through the `-m <path_to_model>` command-line argument, must be of data type FP16.
@@ -224,7 +224,7 @@ For more information on programming the bitstreams, please refer to https://soft
 
 To run the application on the FPGA with floating point precision 16 (FP16), use the `-d HETERO:FPGA,CPU` command-line argument:
 
-    ./store-traffic-monitor.py -d HETERO:FPGA,CPU -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
+    python3 store-traffic-monitor.py -d HETERO:FPGA,CPU -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
 
 -->
 
@@ -234,7 +234,7 @@ In order to not have the sample videos end, thereby ending the application, the 
 This is done by running the application with the `-lp true` command-line argument:
 
 ```
-./store-traffic-monitor.py -lp true -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
+python3 store-traffic-monitor.py -lp true -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
 ```
 This looping does not affect live camera streams, as camera video streams are continuous and do not end.
 
@@ -243,6 +243,6 @@ This looping does not affect live camera streams, as camera video streams are co
 The default application uses a simple user interface created with OpenCV. A web based UI, with more features is also provided with this application.<br>
 From the working directory, run the application with ```-ui true``` command line argument. For example:
 ```
-./store-traffic-monitor.py -ui true -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
+python3 store-traffic-monitor.py -ui true -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
 ```
 Follow the readme provided [here](./UI) to run the web based UI.
