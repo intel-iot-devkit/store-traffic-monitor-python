@@ -23,6 +23,7 @@ Chrome*:
 ```
 google-chrome  --user-data-dir=$HOME/.config/google-chrome/store-traffic-monitor-python --new-window --allow-file-access-from-files --allow-file-access --allow-cross-origin-auth-prompt index.html
 ```
+
 Firefox*:
 ```
 firefox index.html

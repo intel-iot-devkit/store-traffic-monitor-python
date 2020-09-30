@@ -2,34 +2,34 @@
 
 | Details           |              |
 |-----------------------|---------------|
-| Target OS:            |  Ubuntu\* 16.04 LTS   |
-| Programming Language: |  Python* 3.5 |
+| Target OS:            |  Ubuntu\* 18.04 LTS   |
+| Programming Language: |  Python* 3.6 |
 | Time to Complete:    |  50-70min     |
 
 ![store-traffic-monitor](docs/images/stm.png)
 
-An application capable of detecting objects on any number of screens.
-
-## What it Does
-This sample application detects objects in a video stream and calculates the average count of the object in the video stream. Potential use cases of this application are to monitor the activity of people inside and outside a facility, keeping tracking of product inventory etc.
+## What it does
+The store traffic monitor reference implementation gives the total number of people currently present and total number of people visited the facility. It also counts the product inventory. The application is capable of processing the inputs from multiple cameras and video files. It is capable of detecting objects on any number of screens.
 
 ## Requirements
 ### Hardware
 * 6th to 8th Generation Intel® Core™ processor with Iris® Pro graphics or Intel® HD Graphics
 
 ### Software
-* [Ubuntu\* 16.04 LTS](http://releases.ubuntu.com/16.04/)<br>
+* [Ubuntu\* 18.04 LTS](http://releases.ubuntu.com/18.04/)<br>
    *Note*: We recommend using a 4.14+ Linux* kernel with this software. Run the following command to determine your kernel version:
 
       uname -a
   
 * OpenCL™ Runtime Package
-* Intel® Distribution of OpenVINO™ toolkit 2019 R2 Release
+* Intel® Distribution of OpenVINO™ toolkit 2020 R3 Release
 
-## How it Works
+## How It works
 The counter uses the Inference Engine included in the Intel® Distribution of OpenVINO™ toolkit. A trained neural network detects objects within a designated area by displaying a green bounding box over them. This reference implementation identifies multiple objects entering the frame and identifies their class, count, and time entered. 
 
 ![Architectural Diagram](docs/images/architectural-diagram.png)
+
+Architectural Diagram
 
 ## Setup
 
@@ -37,7 +37,7 @@ The counter uses the Inference Engine included in the Intel® Distribution of Op
 
 Steps to clone the reference implementation: (store-traffic-monitor)
 ```
-sudo apt-get update && sudo apt-get install git 
+sudo apt-get update && sudo apt-get install git
 git clone https://github.com/intel-iot-devkit/store-traffic-monitor-python.git
 ``` 
 
@@ -64,7 +64,7 @@ To install the dependencies of the RI and to download the **mobilenet-ssd** Inte
     cd <path_to_the_store-traffic-monitor-python_directory>
     ./setup.sh 
 
-### The labels file
+### The Labels file
 This application requires a _labels_ file associated with the model being used for detection. All detection models work with integer labels and not string labels (e.g. for the ssd300 and mobilenet-ssd models, the number 15 represents the class "person"), that is why each model must have a _labels_ file, which associates an integer (the label the algorithm detects) with a string (denoting the human-readable label).   
 
 The _labels_ file is a text file containing all the classes/labels that the model can recognize, in the order that it was trained to recognize them (one class per line).<br> 
@@ -95,7 +95,7 @@ The `path/to/video` is the path, on the local system, to a video to use as input
 The application can use any number of videos for detection (i.e. the _config.json_ file can have any number of item), but the more videos the application uses in parallel, the more the frame rate of each video scales down. This can be solved by adding more computation power to the machine on which the application is running.
 
 ### Which Input video to use
-The application works with any input video. Sample videos for object detection are provided [here](https://github.com/intel-iot-devkit/sample-videos/). <br>
+The application works with any input video. Sample videos are provided [here](https://github.com/intel-iot-devkit/sample-videos/). <br>
 
 For first-use, we recommend using the [people-detection](https://github.com/intel-iot-devkit/sample-videos/blob/master/people-detection.mp4), [one-by-one-person-detection](https://github.com/intel-iot-devkit/sample-videos/blob/master/one-by-one-person-detection.mp4), [bottle-detection](https://github.com/intel-iot-devkit/sample-videos/blob/master/bottle-detection.mp4) videos. The videos are automatically downloaded to the `resources/` folder by setup.sh. For example:<br>
 
@@ -150,7 +150,7 @@ For example, if the output of above command is `/dev/video0`, then config.json w
 ## Setup the environment
 You must configure the environment to use the Intel® Distribution of OpenVINO™ toolkit one time per session by running the following command:
 
-    source /opt/intel/openvino/bin/setupvars.sh -pyver 3.5
+    source /opt/intel/openvino/bin/setupvars.sh
     
 __Note__: This command needs to be executed only once in the terminal where the application will be executed. If the terminal is closed, the command needs to be executed again.
     
@@ -162,7 +162,7 @@ Change the current directory to the git-cloned application code location on your
 
 To see a list of the various options:
 
-    ./store-traffic-monitor.py -h
+    python3 store_traffic_monitor.py -h
 
 A user can specify what target device to run on by using the device command-line argument `-d` followed by one of the values `CPU`, `GPU`, `HDDL` or `MYRIAD`.<br>   
 To run with multiple devices use -d MULTI:device1,device2. For example: `-d MULTI:CPU,GPU,HDDL`<br>
@@ -171,22 +171,22 @@ If no target device is specified the application will run on the CPU by default.
 ### Running on the CPU
 Although the application runs on the CPU by default, this can also be explicitly specified through the `-d CPU` command-line argument:
 ```
-./store-traffic-monitor.py -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
+python3 store_traffic_monitor.py -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt
 ```
 To run the application on sync mode, use `-f sync` as command line argument. By default, the application runs on async mode.
 
 ### Running on the integrated GPU
-To run on the integrated Intel® GPU in 32 bit mode, use the `-d GPU` command-line argument:
+* To run on the integrated Intel® GPU with floating point precision 32 (FP32), use the `-d GPU` command-line argument:
 
 ```
-./store-traffic-monitor.py -d GPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt
+python3 store_traffic_monitor.py -d GPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt
 ```
    **FP32**: FP32 is single-precision floating-point arithmetic uses 32 bits to represent numbers. 8 bits for the magnitude and 23 bits for the precision. For more information, [click here](https://en.wikipedia.org/wiki/Single-precision_floating-point_format)<br>
     
-To use GPU in 16 bit mode, use the following command:
+* To run on the integrated Intel® GPU with floating point precision 16 (FP16), use the following command:
 
 ```
-./store-traffic-monitor.py -d GPU -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
+python3 store_traffic_monitor.py -d GPU -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
 ```
    **FP16**: FP16 is half-precision floating-point arithmetic uses 16 bits. 5 bits for the magnitude and 10 bits for the precision. For more information, [click here](https://en.wikipedia.org/wiki/Half-precision_floating-point_format)
 
@@ -194,7 +194,7 @@ To use GPU in 16 bit mode, use the following command:
 To run on the Intel® Neural Compute Stick, use the `-d MYRIAD` command-line argument.
 
 ```
-./store-traffic-monitor.py -d MYRIAD -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
+python3 store_traffic_monitor.py -d MYRIAD -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
 ```
 
 **Note:** The Intel® Neural Compute Stick can only run FP16 models. The model that is passed to the application, through the `-m <path_to_model>` command-line argument, must be of data type FP16.   
@@ -203,7 +203,7 @@ To run on the Intel® Neural Compute Stick, use the `-d MYRIAD` command-line arg
 To run on the Intel® Movidius™ VPU, use the `-d HDDL` command-line argument:
 
 ```
-./store-traffic-monitor.py -d HDDL -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
+python3 store_traffic_monitor.py -d HDDL -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt
 ```
 
 **Note:** The Intel® Movidius™ VPU can only run FP16 models. The model that is passed to the application, through the `-m <path_to_model>` command-line argument, must be of data type FP16.
@@ -224,17 +224,16 @@ For more information on programming the bitstreams, please refer to https://soft
 
 To run the application on the FPGA with floating point precision 16 (FP16), use the `-d HETERO:FPGA,CPU` command-line argument:
 
-    ./store-traffic-monitor.py -d HETERO:FPGA,CPU -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
+    ./store_traffic_monitor.py -d HETERO:FPGA,CPU -m ../resources/FP16/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
 
 -->
-
 ### Loop the input video
 By default, the application reads the input videos only once, and ends when the videos ends.
 In order to not have the sample videos end, thereby ending the application, the option to continuously loop the videos is provided.    
 This is done by running the application with the `-lp true` command-line argument:
 
 ```
-./store-traffic-monitor.py -lp true -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
+./store_traffic_monitor.py -lp true -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt
 ```
 This looping does not affect live camera streams, as camera video streams are continuous and do not end.
 
@@ -243,6 +242,6 @@ This looping does not affect live camera streams, as camera video streams are co
 The default application uses a simple user interface created with OpenCV. A web based UI, with more features is also provided with this application.<br>
 From the working directory, run the application with ```-ui true``` command line argument. For example:
 ```
-./store-traffic-monitor.py -ui true -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt -e /opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_avx2.so
+./store_traffic_monitor.py -ui true -d CPU -m ../resources/FP32/mobilenet-ssd.xml -l ../resources/labels.txt
 ```
 Follow the readme provided [here](./UI) to run the web based UI.
